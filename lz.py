@@ -9,7 +9,7 @@ import six, os, sys, csv, time, \
     glob, re, networkx as nx, \
     h5py, yaml, copy, multiprocessing as mp, \
     pandas as pd, yaml, collections, \
-    logging, colorlog, yaml, cvbase as cvb,shutil,\
+    logging, colorlog, yaml, cvbase as cvb, shutil, \
     easydict
 import subprocess
 
@@ -31,6 +31,7 @@ from IPython.display import display, HTML, SVG
 # )
 
 root_path = '/home/wangxinglu/prj/few-shot/'
+
 
 def set_stream_logger(log_level=logging.INFO):
     sh = colorlog.StreamHandler()
@@ -363,9 +364,9 @@ def shell(cmd, block=True):
                                 stderr=subprocess.PIPE,
                                 env=my_env)
         msg = task.communicate()
-        if msg[0] != b'' and msg[0]!='':
+        if msg[0] != b'' and msg[0] != '':
             logging.info('stdout {}'.format(msg[0]))
-        if msg[1] != b'' and msg[1]!='':
+        if msg[1] != b'' and msg[1] != '':
             logging.error('stderr {}'.format(msg[1]))
         return msg
     else:
@@ -434,7 +435,11 @@ def rm(path, block=True, hard=True):
         print(cmd)
         shell(cmd, block=block)
     else:
-        shutil.rmtree(path)
+        if osp.isdir(path):
+            shutil.rmtree(path)
+        else:
+            os.remove(path)
+
     return
 
 

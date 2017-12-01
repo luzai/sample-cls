@@ -21,15 +21,19 @@ def check_individual(filename, filepath):
         # utils.rm(filepath)
         return
     # cv2.imwrite(filepath, im, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
-    if im.shape[0] <= 16 or im.shape[1] <= 16:
-        # utils.rm(filepath)
-        append_file(filepath, '/home/wangxinglu/small.txt')
-        print('rm small ', filepath)
-    assert im.shape[-1] == 3
-    assert im.shape[0] > 13 and im.shape[1] > 13
-    assert (len(im.shape) == 3 and im.shape[-1] == 3), 'img ' + filepath + str(im.shape)
-    assert im.shape[1] != 0 and im.shape[0] != 0, 'width ' + filepath + str(im.shape)
-
+    try:
+        if im.shape[0] <= 16 or im.shape[1] <= 16:
+            # utils.rm(filepath)
+            append_file(filepath, '/home/wangxinglu/small.txt')
+            print('rm small ', filepath)
+            return
+        assert im.shape[0] > 16 and im.shape[1] > 16
+        assert (len(im.shape) == 3 and im.shape[-1] == 3), 'img ' + filepath + str(im.shape)
+        assert im.shape[1] != 0 and im.shape[0] != 0, 'width ' + filepath + str(im.shape)
+    except Exception as inst:
+        print(filepath, ' error ', inst)
+        append_file(filepath,'/home/wangxinglu/corrupt.txt')
+        return
 
 # @chdir_to_root
 # def check_img(prefix='/home/wangxinglu/prj/few-shot/data/imagenet-raw'):
@@ -47,7 +51,7 @@ def check_individual(filename, filepath):
 @chdir_to_root
 def chk_img_lst(path):
     import multiprocessing as mp
-    pool = mp.Pool(320)
+    pool = mp.Pool(32)
     prefix = '/home/wangxinglu/prj/few-shot/data/imagenet-raw/'
     cache=np.array(read_list(path))
     # mypickle(cache,'cache.pkl')
