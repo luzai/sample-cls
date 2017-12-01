@@ -47,21 +47,21 @@ def check_individual(filename, filepath):
 @chdir_to_root
 def chk_img_lst(path):
     import multiprocessing as mp
-    pool = mp.Pool(32)
+    pool = mp.Pool(320)
     prefix = '/home/wangxinglu/prj/few-shot/data/imagenet-raw/'
     cache=np.array(read_list(path))
     # mypickle(cache,'cache.pkl')
     # cache = unpickle('cache.pkl')
     # print(cache, 'ok')
 
-    for imgpath in cache[:, 0]:
+    for imgpath in cache[::-1, 0]:
         pool.apply_async(check_individual, args=(imgpath.split('/')[-1], prefix + imgpath))
     pool.close()
     pool.join()
 
 
 if __name__ == '__main__':
-    chk_img_lst(path='/home/wangxinglu/prj/few-shot/data/imglst/img10k.test.txt')
+    # chk_img_lst(path='/home/wangxinglu/prj/few-shot/data/imglst/img10k.test.txt')
     chk_img_lst(path='/home/wangxinglu/prj/few-shot/data/imglst/img10k.train.txt')
     # check_img()
     # check_img(prefix='/mnt/nfs1703/kchen/imagenet-raw-trans-to-redis')
