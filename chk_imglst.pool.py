@@ -8,7 +8,7 @@ def check_individual(filename, filepath):
     if not osp.exists(filepath):
         print('no exist', filepath)
         append_file(filepath.split('/')[-2], '/home/wangxinglu/fail.txt')
-        utils.rm(osp.dirname(filepath))
+        # utils.rm(osp.dirname(filepath))
         return
     try:
         im = cv2.imread(filepath, cv2.IMREAD_COLOR)
@@ -18,11 +18,11 @@ def check_individual(filename, filepath):
     except Exception as inst:
         print(filepath, ' error ', inst)
         append_file(filepath, '/home/wangxinglu/corrupt.txt')
-        utils.rm(filepath)
+        # utils.rm(filepath)
         return
     # cv2.imwrite(filepath, im, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
     if im.shape[0] <= 16 or im.shape[1] <= 16:
-        utils.rm(filepath)
+        # utils.rm(filepath)
         append_file(filepath, '/home/wangxinglu/small.txt')
         print('rm small ', filepath)
     assert im.shape[-1] == 3
@@ -49,10 +49,10 @@ def chk_img_lst(path):
     import multiprocessing as mp
     pool = mp.Pool(32)
     prefix = '/home/wangxinglu/prj/few-shot/data/imagenet-raw/'
-    # cache=np.array(read_list(path))
+    cache=np.array(read_list(path))
     # mypickle(cache,'cache.pkl')
-    cache = unpickle('cache.pkl')
-    print(cache, 'ok')
+    # cache = unpickle('cache.pkl')
+    # print(cache, 'ok')
 
     for imgpath in cache[:, 0]:
         pool.apply_async(check_individual, args=(imgpath.split('/')[-1], prefix + imgpath))
@@ -61,7 +61,7 @@ def chk_img_lst(path):
 
 
 if __name__ == '__main__':
+    chk_img_lst(path='/home/wangxinglu/prj/few-shot/data/imglst/img10k.test.txt')
     chk_img_lst(path='/home/wangxinglu/prj/few-shot/data/imglst/img10k.train.txt')
-    # chk_img_lst(path='/home/wangxinglu/prj/few-shot/data/imglst/img10k.train.txt')
     # check_img()
     # check_img(prefix='/mnt/nfs1703/kchen/imagenet-raw-trans-to-redis')

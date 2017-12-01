@@ -9,8 +9,8 @@ import tensorflow as tf
 
 # HOME = os.environ['HOME'] or '/home/wangxinglu'
 HOME = '/home/wangxinglu'
-# cache_path= '/home/wangxinglu/prj/few-shot/src/nimgs.pkl'
-cache_path= '/mnt/nfs1703/test/prj/cls-sample/nimgs.dbg.pkl'
+cache_path= '/home/wangxinglu/prj/few-shot/src/nimgs.pkl'
+# cache_path= '/mnt/nfs1703/test/prj/cls-sample/nimgs.dbg.pkl'
 num = 10000
 np.random.seed(64)
 
@@ -24,29 +24,38 @@ def cls_sample(num, prob=None):
     #     leaves[node] = len(tf.gfile.ListDirectory(prefix + '/' + node))
     # mypickle(leaves,cache_path)
 
-    leaves = unpickle(cache_path)
+    name2nimg = unpickle('nimgs.pkl')
+    name2nimg = {name: nimg for name, nimg in name2nimg.items() if nimg >= 10}
 
-    names, nimgs = leaves.keys(), leaves.values()
+    nimgs = np.asarray(list(name2nimg.values()))
+    names = np.asarray(list(name2nimg.keys()))
     names, nimgs = cosort(names, nimgs, True)
-    names = names[nimgs >= 10]
-    nimgs = nimgs[nimgs >= 10]
+
     comb = np.array([names, nimgs]).T
     base_p = 1. / comb.shape[0]
-
+    ind1200 = bsearch(nimgs, 1200)
+    ind1300 = bsearch(nimgs, 1300)
+    indt = nimgs.shape[0]
+    interval = np.diff([0, ind1200, ind1300, indt])
     p = np.concatenate(
-        (np.ones(11803) * prob[0] * base_p,
-         np.ones(1835) * prob[1] * base_p,
-         np.ones(717) * prob[2] * base_p))
+        (np.ones(interval[0]) * prob[0] * base_p,
+         np.ones(interval[1]) * prob[1] * base_p,
+         np.ones(interval[2]) * prob[2] * base_p))
     p = p / p.sum()
     print(p.shape, comb.shape)
-    # res = np.random.choice(np.arange(comb.shape[0]), size=num, replace=False, p=p)
-    res = np.random.choice(np.arange(comb.shape[0]), size=num, replace=False)
+    res = np.random.choice(np.arange(comb.shape[0]), size=num, replace=False, p=p)
+    # res = np.random.choice(np.arange(comb.shape[0]), size=num, replace=False)
 
     res = np.sort(res)
     res_nimgs = comb[res, :][:, 1]
     res = comb[res, :][:, 0]
     return res, res_nimgs
 
+def bsearch(nums,query):
+    nums=np.asarray(nums)
+    small=nums<query
+    res=np.arange(nums.shape[0])[small].max()
+    return res
 
 @chdir_to_root
 def gen_imglst(names, prefix, train_file, test_file):
@@ -88,8 +97,8 @@ if __name__ == '__main__':
     # gen_imglst(names, prefix, train_file, test_file)
 
     prob = [1.35, 0.7, 1.35]
-    train_file = HOME + '/prj/few-shot/data/imglst/img10k.train.dbg'
-    test_file = HOME + '/prj/few-shot/data/imglst/img10k.test.dbg'
+    train_file = HOME + '/prj/few-shot/data/imglst/img10k.train.txt'
+    test_file = HOME + '/prj/few-shot/data/imglst/img10k.test.txt'
     prefix = HOME + '/prj/few-shot/data/imagenet-raw'
 
     names, nimgs = cls_sample(num, prob)
