@@ -8,7 +8,7 @@ from chk_imglst_pool import check_individual
 
 # HOME = os.environ['HOME'] or '/home/wangxinglu'
 HOME = '/home/wangxinglu'
-cache_path = '/home/wangxinglu/prj/few-shot/src/nimgs.pkl'
+cache_path = '/mnt/SSD/luzai/prj/cls-sample/nimgs.pkl'
 num = 10000
 np.random.seed(64)
 
@@ -22,7 +22,7 @@ def cls_sample(num, prob=None):
     #     leaves[node] = (os.listdir(prefix + '/' + node))
     # mypickle(leaves,cache_path)
 
-    name2nimg = unpickle('nimgs.pkl')
+    name2nimg = unpickle(cache_path)
     name2nimg = {name: len(fnames) for name, fnames in name2nimg.items()}
     name2nimg = {name: nimg for name, nimg in name2nimg.items() if nimg >= 10}
 
@@ -41,7 +41,7 @@ def cls_sample(num, prob=None):
          np.ones(interval[1]) * prob[1] * base_p,
          np.ones(interval[2]) * prob[2] * base_p))
     p = p / p.sum()
-    print(p.shape, comb.shape)
+    print('proba shape', p.shape, comb.shape)
     res = np.random.choice(np.arange(comb.shape[0]), size=num, replace=False, p=p)
     # res = np.random.choice(np.arange(comb.shape[0]), size=num, replace=False)
 
@@ -62,7 +62,7 @@ def bsearch(nums, query):
 def gen_imglst(names, prefix, train_file, test_file):
     os.chdir(prefix)
     imgs_train_l, imgs_test_l = [], []
-    name2imgs = unpickle('nimgs.pkl')
+    name2imgs = unpickle(cache_path)
     for ind, cls in enumerate(names):
         if not osp.exists(cls): continue
         imgs = name2imgs[cls]
@@ -70,7 +70,7 @@ def gen_imglst(names, prefix, train_file, test_file):
         if len(imgs) == 0:
             utils.rm(cls)
             continue
-        assert len(imgs) >= 10
+        assert len(imgs) >= 10, 'sampled right cls'
         imgs = np.array(imgs)
         checks = map(check_individual, imgs)
 
@@ -111,5 +111,7 @@ if __name__ == '__main__':
     prefix = HOME + '/prj/few-shot/data/imagenet-raw'
 
     names, nimgs = cls_sample(num, prob)
-    utils.write_list('/home/wangxinglu/prj/few-shot/data/imagenet10k.no1k.chk', names, delimiter=' ', fmt='%s')
+    assert len(nimgs)==num,'how many cls'
+    print(names,len(names))
+    utils.write_list('/home/wangxinglu/prj/few-shot/data/imagenet10k.txt', names, delimiter=' ', fmt='%s')
     gen_imglst(names, prefix, train_file, test_file)
